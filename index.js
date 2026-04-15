@@ -64,7 +64,7 @@
                         label: this.i18n.processWhole,
                         click: () => this.processWholeNotebook()
                     });
-                    menu.showAtMouseEvent(event);
+                    menu.openAtMouseEvent(event);
                 }
             })
         }
