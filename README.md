@@ -1,33 +1,35 @@
-# Alias Recognition Plugin (alias识别)
+# alias识别 (Alias Recognition)
 
-A powerful batch processing tool for SiYuan Note to streamline your workflow by automating metadata synchronization and link conversion.
+[English Version](./README_en_US.md)
 
-## Features
+这是一款强大的思源笔记批量处理插件，通过自动化元数据同步和链接转换，大幅优化你的笔记整理流程。
 
-### 1. Batch Alias Synchronization
-Automatically extracts aliases from multiple sources and syncs them to the official document **Alias** property:
-- **YAML Frontmatter**: Syncs `aliases` or `custom-aliases` defined at the top of the file.
-- **YAML Code Blocks**: Detects and cleans up manual YAML code blocks.
-- **Inline Properties**: Supports `alias:: value` format in paragraphs.
+## 核心功能
 
-### 2. Sibling Batch Processing
-Process all documents in the same folder with a single click. Ideal for bulk-imported notes or journals.
+### 1. 别名自动同步 (Alias Sync)
+自动从多个来源提取别名，并同步到文档官方的 **“别名”** 属性中：
+- **YAML Frontmatter**: 同步文件顶部的 `aliases` 或 `custom-aliases` 字段。
+- **YAML 代码块**: 识别并清理手写的 YAML 代码块。
+- **行内属性**: 支持 `alias:: 值` 格式的段落。
 
-### 3. Full Notebook Synchronization
-Scan and process every single document within a notebook. This feature includes a **Safety Confirmation** step to prevent unintended bulk changes.
+### 2. 同级文档批量处理
+只需点击一下，即可处理当前文件夹下的**所有**文档。非常适合批量导入后的笔记整理。
 
-### 3. Bilateral Link Conversion
-Convert legacy `[[Note Title]]` links into native SiYuan `((ID 'Note Title'))` links automatically.
+### 3. 全量笔记本同步
+一键扫描并处理整个笔记本中的所有文档。该功能包含**安全确认**步骤，防止因误操作导致的大规模文档修改。
 
-### 4. Smart Metadata Cleanup
-Automatically removes empty YAML delimiters (`---`) and redundant markers left behind after synchronization.
+### 3. 双链格式转换
+自动将传统的 `[[笔记标题]]` 链接转换为思源原生的 `((ID '笔记标题'))` ID 链接。
 
-## How to Use
+### 4. 智能元数据清理
+同步完成后，自动移除空的 YAML 分隔符 (`---`) 和多余的代码块标记，保持文档简洁。
 
-1. Click the **Link Icon** in the top bar to open the processing menu.
-2. Select **Alias Recognition in Folder** to handle files in the current folder.
-3. Select **Process All Documents in Notebook** for a full-scale synchronization (requires confirmation).
-4. Observe the progress notification at the top of the window.
+## 如何使用
 
-## Support
-Supports both **English** and **Chinese** (automatically switches based on SiYuan's language settings).
+1. 点击顶栏的 **链接图标** 弹出处理菜单。
+2. 选择 **批量别名识别** 处理当前目录下的文件。
+3. 选择 **同步整个笔记本** 进行全量处理（需二次确认）。
+4. 观察窗口顶部的进度提示。
+
+## 语言支持
+支持 **中文** 和 **英文**（根据思源笔记的语言设置自动切换）。

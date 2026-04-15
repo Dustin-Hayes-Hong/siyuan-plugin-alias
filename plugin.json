@@ -27,8 +27,8 @@
     "zh_CN": "自动化批量同步 YAML 别名至文档属性，并自动转换双链格式。"
   },
   "readme": {
-    "en_US": "README.md",
-    "zh_CN": "README_zh_CN.md"
+    "en_US": "README_en_US.md",
+    "zh_CN": "README.md"
   },
   "funding": {
     "openCollective": "",
