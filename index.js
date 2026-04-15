@@ -64,7 +64,10 @@
                         label: this.i18n.processWhole,
                         click: () => this.processWholeNotebook()
                     });
-                    menu.openAtMouseEvent(event);
+                    menu.open({
+                        x: event.clientX,
+                        y: event.clientY,
+                    });
                 }
             })
         }
