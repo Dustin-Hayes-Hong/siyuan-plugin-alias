@@ -7,6 +7,9 @@
   "searching": "正在识别同级文档...",
   "progress": "[${current}/${total}] 正在处理：${name}",
   "finished": "完成！成功处理了 ${success}/${total} 个文档。",
+  "processWhole": "同步整个笔记本 (危险)",
+  "confirmBatch": "检测到当前笔记本共有 ${docs} 篇文档，是否确定要全量同步所有别名？\n注意：此操作可能会花费较长时间且影响大量文档。",
+  "startBatchFull": "开始全量处理笔记本，共 ${docs} 个文档...",
   "criticalError": "关键错误：${msg}",
   "cleaning": "正在清理空 YAML 块..."
 }

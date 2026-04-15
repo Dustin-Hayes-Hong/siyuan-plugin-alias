@@ -13,6 +13,9 @@ Automatically extracts aliases from multiple sources and syncs them to the offic
 ### 2. Sibling Batch Processing
 Process all documents in the same folder with a single click. Ideal for bulk-imported notes or journals.
 
+### 3. Full Notebook Synchronization
+Scan and process every single document within a notebook. This feature includes a **Safety Confirmation** step to prevent unintended bulk changes.
+
 ### 3. Bilateral Link Conversion
 Convert legacy `[[Note Title]]` links into native SiYuan `((ID 'Note Title'))` links automatically.
 
@@ -21,10 +24,10 @@ Automatically removes empty YAML delimiters (`---`) and redundant markers left b
 
 ## How to Use
 
-1. Click the **Link Icon** in the top bar.
-2. The plugin will identify all sibling documents in the current folder.
-3. Observe the progress notification at the top of the window.
-4. Once finished, document properties will be updated across all files.
+1. Click the **Link Icon** in the top bar to open the processing menu.
+2. Select **Alias Recognition in Folder** to handle files in the current folder.
+3. Select **Process All Documents in Notebook** for a full-scale synchronization (requires confirmation).
+4. Observe the progress notification at the top of the window.
 
 ## Support
 Supports both **English** and **Chinese** (automatically switches based on SiYuan's language settings).

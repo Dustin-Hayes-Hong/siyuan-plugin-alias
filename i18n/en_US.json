@@ -7,6 +7,9 @@
   "searching": "Identifying siblings for document...",
   "progress": "[${current}/${total}] Processing: ${name}",
   "finished": "Finished! Successfully processed ${success}/${total} documents.",
+  "processWhole": "Process All Documents in Notebook",
+  "confirmBatch": "Detected ${docs} documents in this notebook. Do you want to process them all?",
+  "startBatchFull": "Starting full notebook processing for ${docs} documents...",
   "criticalError": "Critical Error: ${msg}",
   "cleaning": "Cleaning up empty YAML block..."
 }

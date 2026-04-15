@@ -2,7 +2,7 @@
   "name": "siyuan-processor",
   "author": "Antigravity",
   "url": "https://github.com/Dustin-Hayes-Hong/siyuan-plugin-alias",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "minAppVersion": "3.3.0",
   "backends": [
     "windows",

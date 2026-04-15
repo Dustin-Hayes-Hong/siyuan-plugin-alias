@@ -34,11 +34,38 @@
             });
         }
         onload() {
+            // Register Commands
+            this.addCommand({
+                langKey: "processBatch",
+                langText: this.i18n.processBatch,
+                hotkey: "\u2325\u2318P",
+                callback: () => this.processCurrentDocument()
+            });
+            this.addCommand({
+                langKey: "processWhole",
+                langText: this.i18n.processWhole,
+                callback: () => this.processWholeNotebook()
+            });
+
+            // Add TopBar dropdown
             this.addTopBar({
                 icon: "iconLink",
                 title: this.i18n.processBatch,
                 position: "right",
-                callback: () => this.processCurrentDocument()
+                callback: (event) => {
+                    const menu = new c.Menu("processorMenu");
+                    menu.addItem({
+                        icon: "iconFiles",
+                        label: this.i18n.processBatch,
+                        click: () => this.processCurrentDocument()
+                    });
+                    menu.addItem({
+                        icon: "iconFolders",
+                        label: this.i18n.processWhole,
+                        click: () => this.processWholeNotebook()
+                    });
+                    menu.showAtMouseEvent(event);
+                }
             })
         }
 
@@ -73,20 +100,69 @@
                     if (docs.findIndex(d => d.id === currentId) === -1) docs.push({ id: currentId, content: "Current" });
 
                     (0, c.showMessage)(this.i18n.startBatch.replace("${docs}", docs.length), 3e3);
+                    yield this.batchProcessDocs(docs);
 
-                    let successCount = 0;
-                    for (let i = 0; i < docs.length; i++) {
-                        const doc = docs[i];
-                        try {
-                            yield this.processDocById(doc.id);
-                            successCount++;
-                        } catch (e) { console.error(`Failed ${doc.content}:`, e); }
+                } catch (e) {
+                    (0, c.showMessage)(this.i18n.criticalError.replace("${msg}", e.message), 10000);
+                }
+            });
+        }
+
+        processWholeNotebook() {
+            return f(this, null, function* () {
+                const editors = (0, c.getAllEditor)();
+                let activeProtyle = null;
+                if (editors && editors.length > 0) {
+                    for (const e of editors) if (e.protyle && e.protyle.active) { activeProtyle = e.protyle; break; }
+                    activeProtyle || (activeProtyle = editors[0].protyle);
+                }
+                if (!activeProtyle) {
+                    (0, c.showMessage)(this.i18n.openDocFirst);
+                    return;
+                }
+
+                const box = activeProtyle.block.box;
+                try {
+                    const query = `SELECT id, content FROM blocks WHERE box = '${box}' AND type = 'd'`;
+                    const res = yield this.request("/api/query/sql", { stmt: query });
+                    const docs = res.data || [];
+
+                    if (docs.length === 0) {
+                        (0, c.showMessage)(this.i18n.noDocs);
+                        return;
                     }
 
-                    (0, c.showMessage)(this.i18n.finished.replace("${success}", successCount).replace("${total}", docs.length), 5e3);
+                    // Confirmation
+                    if (!window.confirm(this.i18n.confirmBatch.replace("${docs}", docs.length))) {
+                        return;
+                    }
+
+                    (0, c.showMessage)(this.i18n.startBatchFull.replace("${docs}", docs.length), 3000);
+                    yield this.batchProcessDocs(docs);
+
                 } catch (e) {
-                    (0, c.showMessage)(this.i18n.criticalError.replace("${msg}", e.message), 1e4);
+                    (0, c.showMessage)(this.i18n.criticalError.replace("${msg}", e.message), 10000);
                 }
+            });
+        }
+
+        batchProcessDocs(docs) {
+            return f(this, null, function* () {
+                let successCount = 0;
+                for (let i = 0; i < docs.length; i++) {
+                    const doc = docs[i];
+                    // Update progress message frequently
+                    if (i % 5 === 0 || i === docs.length - 1) {
+                        (0, c.showMessage)(this.i18n.progress.replace("${current}", i + 1).replace("${total}", docs.length).replace("${name}", doc.content), 1000);
+                    }
+                    try {
+                        yield this.processDocById(doc.id);
+                        successCount++;
+                    } catch (e) {
+                        console.error(`Failed ${doc.content}:`, e);
+                    }
+                }
+                (0, c.showMessage)(this.i18n.finished.replace("${success}", successCount).replace("${total}", docs.length), 5000);
             });
         }
 
