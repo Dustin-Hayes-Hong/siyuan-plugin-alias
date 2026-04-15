@@ -1,0 +1,12 @@
+{
+  "processBatch": "批量别名识别",
+  "startBatch": "开始批量处理 ${docs} 个文档...",
+  "noDocs": "未找到同级文档，仅处理当前页面。",
+  "openDocFirst": "错误：请先打开一个文档。",
+  "docNotFound": "数据库中未找到文档信息，请稍候等索引完成。",
+  "searching": "正在识别同级文档...",
+  "progress": "[${current}/${total}] 正在处理：${name}",
+  "finished": "完成！成功处理了 ${success}/${total} 个文档。",
+  "criticalError": "关键错误：${msg}",
+  "cleaning": "正在清理空 YAML 块..."
+}

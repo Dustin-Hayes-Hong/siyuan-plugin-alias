@@ -1,0 +1,12 @@
+{
+  "processBatch": "Alias Recognition in Folder",
+  "startBatch": "Starting batch processing for ${docs} documents...",
+  "noDocs": "No sibling documents found. Only processing current document.",
+  "openDocFirst": "Error: Please open a document first.",
+  "docNotFound": "Document info not found in database. Please wait for indexing.",
+  "searching": "Identifying siblings for document...",
+  "progress": "[${current}/${total}] Processing: ${name}",
+  "finished": "Finished! Successfully processed ${success}/${total} documents.",
+  "criticalError": "Critical Error: ${msg}",
+  "cleaning": "Cleaning up empty YAML block..."
+}

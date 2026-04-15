@@ -1,0 +1,48 @@
+{
+  "name": "siyuan-processor",
+  "author": "Antigravity",
+  "url": "https://github.com/Dustin-Hayes-Hong/siyuan-plugin-alias",
+  "version": "1.2.1",
+  "minAppVersion": "3.3.0",
+  "backends": [
+    "windows",
+    "linux",
+    "darwin",
+    "docker",
+    "all"
+  ],
+  "frontends": [
+    "desktop",
+    "browser-desktop",
+    "desktop-window",
+    "all"
+  ],
+  "disabledInPublish": false,
+  "displayName": {
+    "en_US": "Alias Recognition",
+    "zh_CN": "alias识别"
+  },
+  "description": {
+    "en_US": "Automated batch tool to sync YAML aliases to SiYuan document properties and convert legacy Wikilinks.",
+    "zh_CN": "自动化批量同步 YAML 别名至文档属性，并自动转换双链格式。"
+  },
+  "readme": {
+    "en_US": "README.md",
+    "zh_CN": "README_zh_CN.md"
+  },
+  "funding": {
+    "openCollective": "",
+    "patreon": "",
+    "github": "",
+    "custom": [
+      "https://github.com/Dustin-Hayes-Hong/siyuan-plugin-alias"
+    ]
+  },
+  "keywords": [
+    "alias",
+    "yaml",
+    "processor",
+    "batch",
+    "别名识别"
+  ]
+}
