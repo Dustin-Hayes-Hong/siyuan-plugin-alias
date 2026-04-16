@@ -1,7 +1,7 @@
 {
-  "syncFolder": "Sync Current Folder Aliases",
-  "startSync": "Synchronizing folder and nested documents, ${docs} total...",
-  "confirmSync": "Detected ${docs} documents in the current folder path. Are you sure you want to start synchronization?",
+  "syncFolder": "Sync Sub-file Aliases",
+  "startSync": "Synchronizing sub-file aliases, ${docs} total...",
+  "confirmSync": "Detected ${docs} sub-files. Proceed with alias synchronization?",
   "noDocs": "No documents found in the current path.",
   "openDocFirst": "Error: Please open a document first.",
   "docNotFound": "Document info not found in database.",

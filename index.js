@@ -171,131 +171,73 @@
         processDocById(rootId) {
             return f(this, null, function* () {
                 let allAliases = [];
+                
+                // 1. Fetch existing aliases from attributes to prevent overwriting
                 const rootAttrsRes = yield this.request("/api/attr/getBlockAttrs", { id: rootId });
                 if (rootAttrsRes && rootAttrsRes.code === 0) {
                     const attrs = rootAttrsRes.data;
-                    const attrKeys = ['custom-aliases', 'aliases', 'alias'];
-                    for (const key of attrKeys) {
-                        if (attrs[key]) {
-                            let val = attrs[key].toString().trim();
-                            val = val.replace(/^\[(.*)\]$/, '$1').replace(/^['"](.*)['"]$/, '$1');
-                            if (val) allAliases.push(...val.split(/[,，]/).map(v => v.trim()).filter(v => v));
-                        }
+                    const existing = attrs.alias || "";
+                    if (existing) {
+                        allAliases.push(...existing.split(/[,，]/).map(v => v.trim()).filter(v => v));
                     }
                 }
 
+                // 2. Scan first 10 blocks for NEW alias definitions (Read-Only)
                 const blocksRes = yield this.request("/api/block/getChildBlocks", { id: rootId });
-                if (!blocksRes || blocksRes.code !== 0) return;
-                const blocks = blocksRes.data || [];
-                
-                for (let block of blocks.slice(0, 10)) {
-                    const kRes = yield this.request("/api/block/getBlockKramdown", { id: block.id });
-                    if (kRes && kRes.code === 0) {
-                        const kramdown = kRes.data.kramdown;
-                        if (kramdown.toLowerCase().includes("alias") || block.type === "c") {
-                            const found = yield this.parseYaml(rootId, block, kramdown);
-                            if (found) allAliases.push(...found);
-                        } else if (kramdown.trim() === "---" || kramdown.trim() === "```yaml\n```") {
-                             yield this.request("/api/block/updateBlock", { id: block.id, data: "", dataType: "markdown" });
-                        }
-                    }
-                }
-
-                const unique = [...new Set(allAliases.map(a => a.trim()))].filter(a => a);
-                if (unique.length > 0) yield this.request("/api/attr/setBlockAttrs", { id: rootId, attrs: { alias: unique.join(",") } });
-
-                let firstPara = blocks.find(l => l.type === "p");
-                if (firstPara) yield this.parseAttributes(rootId, firstPara);
-                yield this.processLinks(blocks);
-            });
-        }
-
-        parseYaml(rootId, block, kramdown) {
-            return f(this, null, function* () {
-                const lines = kramdown.split(/\r?\n/);
-                let list = [], keep = [], i = 0;
-                while (i < lines.length) {
-                    let line = lines[i];
-                    let match = line.match(/\b(?:aliases|alias):\s*(.*)$/i);
-                    if (match) {
-                        let val = match[1].trim();
-                        if (val === "" || val === ">" || val === "|") {
-                            i++;
-                            while (i < lines.length) {
-                                let m = lines[i].match(/^\s*-\s+(.+)$/);
-                                if (m) { list.push(m[1].trim()); i++; }
-                                else if (lines[i].trim() === "" || lines[i].trim() === "---") i++;
-                                else if (/\b[\w-]+:/.test(lines[i])) break;
-                                else i++;
+                if (blocksRes && blocksRes.code === 0) {
+                    const blocks = blocksRes.data || [];
+                    for (let block of blocks.slice(0, 10)) {
+                        const kRes = yield this.request("/api/block/getBlockKramdown", { id: block.id });
+                        if (kRes && kRes.code === 0) {
+                            const kramdown = kRes.data.kramdown;
+                            const lines = kramdown.split(/\r?\n/);
+                            
+                            for (let i = 0; i < lines.length; i++) {
+                                const line = lines[i].trim();
+                                // Match alias: val or aliases: val or alias:: val
+                                const m = line.match(/^(?:aliases|alias)::?\s*(.*)$/i);
+                                if (m) {
+                                    let val = m[1].trim();
+                                    // Handle YAML list starting on next lines
+                                    if (val === "" || val === "-" || val === ">" || val === "|") {
+                                        let j = i + 1;
+                                        while (j < lines.length) {
+                                            const subLine = lines[j].trim();
+                                            const listMatch = subLine.match(/^-\s+(.+)$/);
+                                            if (listMatch) {
+                                                allAliases.push(listMatch[1].trim());
+                                                j++;
+                                            } else if (subLine === "") {
+                                                j++; // skip empty lines in list
+                                            } else {
+                                                break; // end of list
+                                            }
+                                        }
+                                        i = j - 1;
+                                    } else {
+                                        // Handle inline or comma-separated list [a, b]
+                                        val = val.replace(/^\[(.*)\]$/, '$1').replace(/^['"](.*)['"]$/, '$1');
+                                        allAliases.push(...val.split(/[,，]/).map(v => v.trim()).filter(v => v));
+                                    }
+                                }
                             }
-                            continue;
-                        } else {
-                            val = val.replace(/^\[(.*)\]$/, '$1').replace(/^['"](.*)['"]$/, '$1');
-                            if (val.includes(",") || val.includes("，")) list.push(...val.split(/[,，]/));
-                            else list.push(val);
-                            i++; continue;
                         }
                     }
-                    keep.push(line); i++;
                 }
-                if (list.length > 0) {
-                    let data = keep.join("\n").trim();
-                    if (data === "---\n---" || data === "---" || data === "```yaml\n```" || data === "```\n```") data = "";
-                    yield this.request("/api/block/updateBlock", { id: block.id, data: data, dataType: "markdown" });
+
+                // 3. Merge and Filter Unique Aliases
+                const unique = [...new Set(allAliases.map(a => a.trim()))].filter(a => a);
+                
+                // 4. Update Attributes ONLY (No updateBlock)
+                if (unique.length > 0) {
+                    yield this.request("/api/attr/setBlockAttrs", { 
+                        id: rootId, 
+                        attrs: { alias: unique.join(",") } 
+                    });
                 }
-                return list.map(v => v.trim().replace(/^['"](.*)['"]$/, '$1')).filter(v => v);
             });
         }
 
-        parseAttributes(rootId, targetBlock) {
-            return f(this, null, function* () {
-                const r = yield this.request("/api/block/getBlockKramdown", { id: targetBlock.id });
-                if (!r || r.code !== 0) return 0;
-                const e = r.data.kramdown, lines = e.split(`\n`);
-                let count = 0, aliasVal = "", newLines = [];
-                const regex = /([\w\u4e00-\u9fa5]+)::\s*(.+)/g;
-                for (const line of lines) {
-                    let processed = line.replace(regex, (m, k, v) => {
-                        count++;
-                        if (k.toLowerCase() === "alias") { aliasVal = v; return ""; }
-                        return `[[${k}]] [[${v}]]`;
-                    });
-                    newLines.push(processed);
-                }
-                if (aliasVal) yield this.request("/api/attr/setBlockAttrs", { id: rootId, attrs: { alias: aliasVal } });
-                const finalData = newLines.filter(g => g.trim() !== "").join(`\n`);
-                if (finalData !== e) yield this.request("/api/block/updateBlock", { id: targetBlock.id, data: finalData, dataType: "markdown" });
-                return count;
-            })
-        }
-
-        processLinks(blocks) {
-            return f(this, null, function* () {
-                let count = 0;
-                for (const block of blocks) {
-                    if (block.type !== "p" && block.type !== "h" && block.type !== "i") continue;
-                    const res = yield this.request("/api/block/getBlockKramdown", { id: block.id });
-                    if (!res || res.code !== 0) continue;
-                    let kramdown = res.data.kramdown;
-                    const linkRegex = /\[\[(.*?)\]\]/g;
-                    let match, replacements = [];
-                    for (; (match = linkRegex.exec(kramdown)) !== null;) {
-                        const content = match[1];
-                        const query = yield this.request("/api/query/sql", { stmt: `SELECT id FROM blocks WHERE type='d' AND content='${content.replace(/'/g, "''")}' LIMIT 1` });
-                        if (query && query.data && query.data.length > 0) {
-                            replacements.push({ original: match[0], replacement: `((${query.data[0].id} '${content}'))` });
-                            count++;
-                        }
-                    }
-                    if (replacements.length > 0) {
-                        let updated = kramdown;
-                        for (const rep of replacements) updated = updated.replace(rep.original, rep.replacement);
-                        yield this.request("/api/block/updateBlock", { id: block.id, data: updated, dataType: "markdown" });
-                    }
-                }
-                return count;
-            })
-        }
         onunload() {}
     }
     module.exports = h

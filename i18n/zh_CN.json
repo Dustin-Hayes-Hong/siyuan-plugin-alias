@@ -1,7 +1,7 @@
 {
-  "syncFolder": "同步当前文件夹别名",
-  "startSync": "正在同步文件夹及其子文档，共 ${docs} 个文档...",
-  "confirmSync": "当前路径（文件夹）下共检测到 ${docs} 个文档，是否确定开始同步？",
+  "syncFolder": "同步子文件别名",
+  "startSync": "正在同步子文件别名，共 ${docs} 个文档...",
+  "confirmSync": "共检测到 ${docs} 个子文件，是否进行别名同步？",
   "noDocs": "当前路径下未找到文档。",
   "openDocFirst": "错误：请先打开一个文档。",
   "docNotFound": "数据库中未找到文档信息。",
