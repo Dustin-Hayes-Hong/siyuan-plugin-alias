@@ -1,15 +1,12 @@
 {
-  "processBatch": "批量别名识别",
-  "startBatch": "开始批量处理 ${docs} 个文档...",
-  "noDocs": "未找到同级文档，仅处理当前页面。",
+  "syncFolder": "同步当前文件夹别名",
+  "startSync": "正在同步文件夹及其子文档，共 ${docs} 个文档...",
+  "confirmSync": "当前路径（文件夹）下共检测到 ${docs} 个文档，是否确定开始同步？",
+  "noDocs": "当前路径下未找到文档。",
   "openDocFirst": "错误：请先打开一个文档。",
-  "docNotFound": "数据库中未找到文档信息，请稍候等索引完成。",
-  "searching": "正在识别同级文档...",
+  "docNotFound": "数据库中未找到文档信息。",
+  "cannotSyncRoot": "安全提示：无法同步根目录（整本笔记本）。请进入具体的子文件夹内操作。",
   "progress": "[${current}/${total}] 正在处理：${name}",
-  "finished": "完成！成功处理了 ${success}/${total} 个文档。",
-  "processWhole": "同步整个笔记本 (危险)",
-  "confirmBatch": "检测到当前笔记本共有 ${docs} 篇文档，是否确定要全量同步所有别名？\n注意：此操作可能会花费较长时间且影响大量文档。",
-  "startBatchFull": "开始全量处理笔记本，共 ${docs} 个文档...",
-  "criticalError": "关键错误：${msg}",
-  "cleaning": "正在清理空 YAML 块..."
+  "finished": "完成！成功同步了 ${success}/${total} 个文档。",
+  "criticalError": "关键错误：${msg}"
 }

@@ -1,15 +1,12 @@
 {
-  "processBatch": "Alias Recognition in Folder",
-  "startBatch": "Starting batch processing for ${docs} documents...",
-  "noDocs": "No sibling documents found. Only processing current document.",
+  "syncFolder": "Sync Current Folder Aliases",
+  "startSync": "Synchronizing folder and nested documents, ${docs} total...",
+  "confirmSync": "Detected ${docs} documents in the current folder path. Are you sure you want to start synchronization?",
+  "noDocs": "No documents found in the current path.",
   "openDocFirst": "Error: Please open a document first.",
-  "docNotFound": "Document info not found in database. Please wait for indexing.",
-  "searching": "Identifying siblings for document...",
+  "docNotFound": "Document info not found in database.",
+  "cannotSyncRoot": "Safety Note: Root directory (entire notebook) cannot be synchronized. Please navigate to a sub-folder.",
   "progress": "[${current}/${total}] Processing: ${name}",
-  "finished": "Finished! Successfully processed ${success}/${total} documents.",
-  "processWhole": "Process All Documents in Notebook",
-  "confirmBatch": "Detected ${docs} documents in this notebook. Do you want to process them all?",
-  "startBatchFull": "Starting full notebook processing for ${docs} documents...",
-  "criticalError": "Critical Error: ${msg}",
-  "cleaning": "Cleaning up empty YAML block..."
+  "finished": "Success! Synchronized ${success}/${total} documents.",
+  "criticalError": "Critical Error: ${msg}"
 }

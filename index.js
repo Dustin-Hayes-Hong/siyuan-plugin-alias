@@ -34,45 +34,24 @@
             });
         }
         onload() {
-            // Register Commands
+            // Register Command
             this.addCommand({
-                langKey: "processBatch",
-                langText: this.i18n.processBatch,
+                langKey: "syncFolder",
+                langText: this.i18n.syncFolder,
                 hotkey: "\u2325\u2318P",
-                callback: () => this.processCurrentDocument()
-            });
-            this.addCommand({
-                langKey: "processWhole",
-                langText: this.i18n.processWhole,
-                callback: () => this.processWholeNotebook()
+                callback: () => this.processCurrentFolder()
             });
 
-            // Add TopBar dropdown
+            // Add TopBar button
             this.addTopBar({
                 icon: "iconLink",
-                title: this.i18n.processBatch,
+                title: this.i18n.syncFolder,
                 position: "right",
-                callback: (event) => {
-                    const menu = new c.Menu("processorMenu");
-                    menu.addItem({
-                        icon: "iconFiles",
-                        label: this.i18n.processBatch,
-                        click: () => this.processCurrentDocument()
-                    });
-                    menu.addItem({
-                        icon: "iconFolders",
-                        label: this.i18n.processWhole,
-                        click: () => this.processWholeNotebook()
-                    });
-                    menu.open({
-                        x: event.clientX,
-                        y: event.clientY,
-                    });
-                }
-            })
+                callback: () => this.processCurrentFolder()
+            });
         }
 
-        processCurrentDocument() {
+        processCurrentFolder() {
             return f(this, null, function* () {
                 const editors = (0, c.getAllEditor)();
                 let activeProtyle = null;
@@ -88,59 +67,79 @@
                 const currentId = activeProtyle.block.rootID;
                 try {
                     const infoRes = yield this.request("/api/query/sql", { 
-                        stmt: `SELECT parent_id, box FROM blocks WHERE id = '${currentId}'` 
+                        stmt: `SELECT id, path, hpath, box FROM blocks WHERE id = '${currentId}'` 
                     });
                     if (!infoRes || !infoRes.data || infoRes.data.length === 0) {
                         (0, c.showMessage)(this.i18n.docNotFound);
                         return;
                     }
                     
-                    const { parent_id, box } = infoRes.data[0];
-                    const query = `SELECT id, content FROM blocks WHERE parent_id = '${parent_id || ""}' AND type = 'd' AND box = '${box}'`;
-                    const siblingsRes = yield this.request("/api/query/sql", { stmt: query });
-                    let docs = siblingsRes.data || [];
+                    let { id, path, hpath, box } = infoRes.data[0];
+                    console.log("EXECUTION START ----------------");
+                    console.log("Current Doc ID:", id);
+                    console.log("Current Path:", path);
+                    console.log("Current Hpath:", hpath);
+                    console.log("Current Box:", box);
+
+                    // Safety Check: Root path
+                    if (hpath === "/" || path === "/" || !path) {
+                        console.log("STOP: Root path detected.");
+                        (0, c.showMessage)(this.i18n.cannotSyncRoot);
+                        return;
+                    }
+
+                    // Normalize folder prefix: remove .sy and ensure it ends with /
+                    const folderPrefix = path.endsWith(".sy") ? path.slice(0, -3) : path;
+                    console.log("Determined Folder Prefix:", folderPrefix);
+
+                    // Check notebook-wide total document count for troubleshooting
+                    const totalRes = yield this.request("/api/query/sql", {
+                        stmt: `SELECT count(*) as total FROM blocks WHERE box = '${box}' AND type = 'd'`
+                    });
+                    console.log("Notebook Total Documents in Database:", totalRes.data ? totalRes.data[0].total : "unknown");
+
+                    // Fallback to File Tree API to find documents that are NOT in the database index
+                    // This is essential for large notebooks with non-indexed journals
+                    console.log("Using File Tree API to list documents in folder:", folderPrefix);
+                    const treeRes = yield this.request("/api/filetree/listDocsByPath", {
+                        notebook: box,
+                        path: folderPrefix
+                    });
                     
-                    if (docs.findIndex(d => d.id === currentId) === -1) docs.push({ id: currentId, content: "Current" });
+                    let docs = [];
+                    // Always include the current document itself
+                    docs.push({ id, content: hpath, path });
 
-                    (0, c.showMessage)(this.i18n.startBatch.replace("${docs}", docs.length), 3e3);
-                    yield this.batchProcessDocs(docs);
-
-                } catch (e) {
-                    (0, c.showMessage)(this.i18n.criticalError.replace("${msg}", e.message), 10000);
-                }
-            });
-        }
-
-        processWholeNotebook() {
-            return f(this, null, function* () {
-                const editors = (0, c.getAllEditor)();
-                let activeProtyle = null;
-                if (editors && editors.length > 0) {
-                    for (const e of editors) if (e.protyle && e.protyle.active) { activeProtyle = e.protyle; break; }
-                    activeProtyle || (activeProtyle = editors[0].protyle);
-                }
-                if (!activeProtyle) {
-                    (0, c.showMessage)(this.i18n.openDocFirst);
-                    return;
-                }
-
-                const box = activeProtyle.block.box;
-                try {
-                    const query = `SELECT id, content FROM blocks WHERE box = '${box}' AND type = 'd'`;
-                    const res = yield this.request("/api/query/sql", { stmt: query });
-                    const docs = res.data || [];
+                    if (treeRes.data && treeRes.data.files) {
+                        // SiYuan's listDocsByPath returns an array of file objects
+                        for (const f of treeRes.data.files) {
+                            // Only include documents (.sy files)
+                            if (f.name.endsWith(".sy")) {
+                                docs.push({
+                                    id: f.id,
+                                    content: f.name.replace(".sy", ""), // Use filename as fallback content
+                                    path: f.path
+                                });
+                            }
+                        }
+                    }
+                    
+                    console.log(`MATCHED ${docs.length} documents (including self) via File Tree API.`);
+                    if (docs.length < 100) {
+                        console.log("Matched Paths:", docs.map(d => d.path));
+                    }
+                    console.log("EXECUTION END ------------------");
 
                     if (docs.length === 0) {
                         (0, c.showMessage)(this.i18n.noDocs);
                         return;
                     }
 
-                    // Confirmation
-                    if (!window.confirm(this.i18n.confirmBatch.replace("${docs}", docs.length))) {
+                    if (!window.confirm(this.i18n.confirmSync.replace("${docs}", docs.length))) {
                         return;
                     }
 
-                    (0, c.showMessage)(this.i18n.startBatchFull.replace("${docs}", docs.length), 3000);
+                    (0, c.showMessage)(this.i18n.startSync.replace("${docs}", docs.length), 3e3);
                     yield this.batchProcessDocs(docs);
 
                 } catch (e) {
